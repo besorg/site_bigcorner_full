@@ -1,0 +1,61 @@
+---
+// src/components/Navbar.astro
+---
+
+<style>
+  header {
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .navbar {
+    max-width: 1000px;
+    margin: auto;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .navbar a {
+    color: #333;
+    text-decoration: none;
+    margin-left: 16px;
+    font-size: 15px;
+  }
+
+  .navbar a:hover {
+    color: #0077cc;
+  }
+
+  .logo {
+    font-weight: bold;
+    font-size: 18px;
+    color: #0077cc;
+    text-decoration: none;
+  }
+
+  #toggle-theme {
+    margin-left: 16px;
+    cursor: pointer;
+    font-size: 18px;
+    background: none;
+    border: none;
+  }
+</style>
+
+<header>
+  <div class="navbar">
+    <a href="/" class="logo">BSO Web Studio</a>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="#services">Servicios</a>
+      <a href="#about">Sobre Nosotros</a>
+      <a href="#contact">Contacto</a>
+      <button id="toggle-theme" title="Cambiar tema">🌙</button>
+    </nav>
+  </div>
+</header>

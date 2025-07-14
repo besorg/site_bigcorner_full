@@ -1,0 +1,52 @@
+---
+const { title } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+  </head>
+  <body class="light">
+    <header class="header">
+      <nav class="navbar container">
+        <div class="logo-area">
+          <img src="/images/favicon.png" alt="Logo BIG CORNER" class="logo" />
+          <span class="brand-name">BIG CORNER</span>
+        </div>
+        <ul class="nav-links">
+          <li><a href="#menu">Menú</a></li>
+          <li><a href="#about">Sobre Nosotros</a></li>
+          <li><a href="#reviews">Reseñas</a></li>
+          <li><a href="#contact">Contacto</a></li>
+          <li>
+            <button id="toggle-theme" class="theme-toggle">🌙</button>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <script>
+      const toggle = document.getElementById('toggle-theme');
+      const root = document.documentElement;
+
+      if (localStorage.getItem('theme') === 'dark') {
+        root.classList.add('dark');
+        toggle.textContent = '☀️';
+      }
+
+      toggle?.addEventListener('click', () => {
+        const isDark = root.classList.toggle('dark');
+        toggle.textContent = isDark ? '☀️' : '🌙';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+    </script>
+  </body>
+</html>
