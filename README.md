@@ -40,7 +40,7 @@ Este proyecto forma parte del catálogo de sitios de demostración individuales 
 
 ## 🌐 Vista en línea
 
-[https://big-corner.netlify.app](https://big-corner.netlify.app) *(enlace se actualiza cuando esté publicado)*
+[https://big-corner.netlify.app](https://big-corner-full.netlify.app) *(enlace se actualiza cuando esté publicado)*
 
 ---
 
