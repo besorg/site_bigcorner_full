@@ -7,12 +7,12 @@ async function fetchGoogleSheetData(sheetUrl) {
 }
 
 async function loadData() {
-  const sheets = ['productos', 'reseñas', 'negocio'];
-  const baseId = '1tZCdHo9AGa1ts-j30mdUb2lnwh1v5rLMjGj3xtuKPRg'; // ID de tu Google Sheet
+  const sheets = ['productos', 'resenias', 'negocio'];
+  const baseId = '1oSXRJkVeD3napDd9bltITSA4snw4uqOgXzLtfav05yo'; // ID de tu Google Sheet
   const gidMap = {
-    productos: '0',
-    reseñas: '1749471671',
-    negocio: '1592764057'
+    productos: '1636054267',
+    resenias: '1073461284',
+    negocio: '1526476747'
   };
 
   const data = {};
