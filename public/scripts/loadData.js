@@ -5,7 +5,7 @@ window.addEventListener('DOMContentLoaded', () => {
       const parsed = Papa.parse(csvText, { header: true });
       const rows = parsed.data;
 
-      const products = rows.filter(row => row.name && row.image).map(row => ({
+      const products = rows.filter(row => row.nombre && row.imagen).map(row => ({
         name: row.nombre,
         description: row.descripcion,
         image: row.imagen,
