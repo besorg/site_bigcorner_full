@@ -132,7 +132,7 @@ import Layout from '../layouts/Layout.astro';
         window.dynamicWhatsapp = data.whatsapp;
 
         const list = document.getElementById('burger-list');
-        window.dynamicProducts = productos.filter(row => row.nombre && row.imagen).map(row => ({
+        window.dynamicProducts = productos.filter(row => row.nombre?.trim() && row.imagen?.trim()).map(row => ({
           name: row.nombre,
           description: row.descripcion,
           image: row.imagen,
@@ -148,7 +148,7 @@ import Layout from '../layouts/Layout.astro';
           </div>
         `).join('');
 
-        document.getElementById('reviews-container').innerHTML = resenas.map(r => `
+        document.getElementById('reviews-container').innerHTML = resenas.filter(r => r.cita?.trim() && r.autor?.trim()).map(r => `
           <div class="review">
             <p>“${r.cita.trim()}”</p>
             <span>- ${r.autor.trim()}</span>
