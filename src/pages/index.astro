@@ -1,28 +1,30 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/Navbar.astro';
 ---
 
-<Layout title="Big Corner">
-  <Navbar />
-
+<Layout title="BIG CORNER - Hamburguesas">
   <section class="hero">
     <div class="hero-content">
-      <div class="hero-column">
-        <img src="/images/logo.png" alt="Big Corner Logo" class="hero-logo" />
-      </div>
-      <div class="hero-column">
-        <h1>Las mejores burgers de tu barrio</h1>
-        <p>Pedí por WhatsApp, pasá a retirar o recibí en tu casa</p>
-        <a class="btn" href="https://wa.me/5491132776974" target="_blank">Hacé tu pedido</a>
-      </div>
-    </div>
+  <div class="hero-column">
+    <img src="/images/logo.png" alt="Logo BIG CORNER" class="hero-logo" />
+  </div>
+  <div class="hero-column">
+    <h1>Las mejores hamburguesas al mejor precio</h1>
+    <p>De jueves a domingo de 20:00 a 00:30</p>
+    <a id="whatsapp-button" class="btn hero-btn" target="_blank">Hacenos tu pedido</a>
+  </div>
+</div>
   </section>
 
   <section class="menu" id="menu">
-    <h2>Productos</h2>
-    <p class="menu-subtitle">Seleccioná una burger para personalizar tu pedido</p>
-    <div id="burger-list" class="burger-list"></div>
+    <h2>Menú</h2>
+    <p class="menu-subtitle">Tu pedido está a solo unos clicks y te lo llevamos a domicilio</p>
+    <div class="burger-list" id="burger-list"></div>
+  </section>
+
+  <section class="about" id="about">
+    <h2>Sobre Nosotros</h2>
+    <p>Somos BIG CORNER, una hamburguesería de barrio con pasión por el sabor. Cada producto es hecho con ingredientes frescos, pan artesanal y recetas que te van a dejar con ganas de más.</p>
   </section>
 
   <section class="reviews" id="reviews">
@@ -30,24 +32,132 @@ import Navbar from '../components/Navbar.astro';
     <div id="reviews-container"></div>
   </section>
 
-  <section class="about" id="about">
-    <h2>Sobre Nosotros</h2>
-    <p>Big Corner nació con la idea de llevar hamburguesas caseras y sabrosas a cada rincón del barrio. Nuestro compromiso es con la calidad y el sabor.</p>
-  </section>
+  <div id="burger-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <img id="modal-img" src="" alt="Hamburguesa" />
+      <h3 id="modal-title"></h3>
+      <p id="modal-description"></p>
+
+      <form id="order-form" onsubmit="sendOrder(event)">
+        <label for="quantity">Cantidad:</label>
+        <input type="number" id="quantity" name="quantity" min="1" value="1" required />
+
+<div class="price-line">
+  <label><strong>Precio por unidad:</strong> <span id="unit-price">$0</span></label>
+  <label><strong>Total:</strong> <span id="order-total">$0</span></label>
+</div>
+
+
+        <label for="address">Dirección de entrega:</label>
+        <input type="text" id="address" name="address" required />
+
+        <label for="comment">Comentario adicional:</label>
+        <textarea id="comment" name="comment"></textarea>
+
+        <input type="hidden" id="product-name" name="product-name" />
+        <button type="submit">Pedir por WhatsApp</button>
+      </form>
+    </div>
+  </div>
 
   <section class="contact" id="contact">
     <h2>Contacto</h2>
+    <p>Contactanos por nuestras redes sociales o hacé tu pedido directamente.</p>
     <div class="contact-methods">
-      <p><img src="/images/whatsapp.svg" alt="WhatsApp" class="icon" />+54 9 11 3277 6974</p>
-      <p><img src="/images/map.svg" alt="Dirección" class="icon" />Av. Siempreviva 123, CABA</p>
+      <a href="https://instagram.com/bigcorner2024" target="_blank">
+        <img src="/images/instagram-icon.png" alt="Instagram" class="icon" />
+      </a>
+      <a href="https://wa.me/5491132776974" target="_blank">
+        <img src="/images/whatsapp-icon.png" alt="WhatsApp" class="icon" />
+      </a>
     </div>
   </section>
 
   <footer class="footer">
-    <p>&copy; 2025 Big Corner. Todos los derechos reservados.</p>
+    <p>
+      Sitio desarrollado por <a href="https://marketing-bso.netlify.app/" target="_blank" style="color: inherit; text-decoration: underline;">BSO Web Studio</a>
+    </p>
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> BIG CORNER. Todos los derechos reservados.</p>
   </footer>
-</Layout>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
-<script src="/scripts/loadData.js" defer></script>
-<script src="/scripts/modal.js" defer></script>
+  <!-- PapaParse -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+
+  <!-- Modal logic -->
+  <script src="/scripts/modal.js" defer></script>
+
+  <!-- Carga de datos -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const baseId = '1oSXRJkVeD3napDd9bltITSA4snw4uqOgXzLtfav05yo';
+
+      const urls = {
+        menu: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=menu`,
+        whatsapp: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=whatsapp`,
+        reviews: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=reviews`
+      };
+
+      function fetchCSV(url) {
+        return fetch(url)
+          .then(res => res.text())
+          .then(csv => {
+            const parsed = Papa.parse(csv, { header: false }).data;
+            const headers = parsed[0].map(h => h.trim().toLowerCase());
+            return parsed.slice(1).map(row => {
+              const obj = {};
+              headers.forEach((key, i) => {
+                obj[key] = row[i]?.trim?.() ?? '';
+              });
+              return obj;
+            });
+          });
+      }
+
+      Promise.all([
+        fetchCSV(urls.menu),
+        fetchCSV(urls.whatsapp),
+        fetchCSV(urls.reviews)
+      ]).then(([menuRows, whatsappRows, reviewsRows]) => {
+        // WhatsApp
+        const whatsapp = whatsappRows[0]?.whatsapp?.trim() || '5491132776974';
+        window.dynamicWhatsapp = whatsapp;
+
+const whatsappButton = document.getElementById('whatsapp-button');
+if (whatsappButton && whatsapp) {
+  whatsappButton.href = `https://wa.me/${whatsapp}`;
+}
+
+        // Productos
+        const products = menuRows
+          .filter(row => row.name && row.image)
+          .map(row => ({
+            name: row.name,
+            description: row.description,
+            image: row.image,
+            price: row.price
+          }));
+        window.dynamicProducts = products;
+
+        const list = document.getElementById('burger-list');
+        list.innerHTML = products.map((product, index) => `
+          <div class="burger-card" onclick="openModalFromList(${index})">
+            <img src="${product.image}" alt="${product.name}" />
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            <p class="price">$${product.price}</p>
+          </div>
+        `).join('');
+
+        // Reseñas
+        const reviews = reviewsRows
+          .filter(r => r.quote && r.author)
+          .map(r => `<div class="review"><p>“${r.quote.trim()}”</p><span>- ${r.author.trim()}</span></div>`);
+
+        document.getElementById('reviews-container').innerHTML = reviews.join('');
+      }).catch(err => {
+        console.error("Error cargando los datos:", err);
+      });
+    });
+  </script>
+</Layout>
