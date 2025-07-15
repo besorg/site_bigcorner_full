@@ -2,164 +2,56 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="BIG CORNER - Hamburguesas">
+<Layout title={negocio?.nombre || 'Nombre del Local'}>
   <section class="hero">
     <div class="hero-content">
       <div class="hero-column">
-        <img id="logo-img" src="" alt="Logo" class="hero-logo" />
-      </div>
-      <div class="hero-column">
-        <h1 id="titulo-local">Cargando...</h1>
-        <p id="horario">Cargando...</p>
-        <a id="whatsapp-button" class="btn hero-btn" target="_blank">Cargando...</a>
+        <img src={negocio?.logo || '/images/logo.png'} alt="Logo" class="hero-logo" />
+        <h1>{negocio?.nombre || 'Nombre del Local'}</h1>
+        <p>{negocio?.descripcion || 'Descripción breve del local.'}</p>
+        <a class="btn" href={`https://wa.me/${negocio?.whatsapp}?text=${encodeURIComponent(negocio?.mensaje_boton_whatsapp || '¡Hola! ¿Qué necesitás hoy?')}`} target="_blank">
+          {negocio?.texto_boton_whatsapp || 'Hacenos tu pedido'}
+        </a>
       </div>
     </div>
   </section>
 
   <section class="menu" id="menu">
     <h2>Menú</h2>
-    <p id="menu-subtitulo" class="menu-subtitle"></p>
+    <p class="menu-subtitle">{negocio?.subtitulo_menu || 'Conocé nuestras hamburguesas'}</p>
     <div class="burger-list" id="burger-list"></div>
   </section>
 
   <section class="about" id="about">
     <h2>Sobre Nosotros</h2>
-    <p id="descripcion-local"></p>
+    <p>{negocio?.descripcion || 'Somos una hamburguesería de barrio apasionada por el sabor.'}</p>
+    {negocio?.horario && <p><strong>Horario: {negocio.horario}</strong></p>}
   </section>
 
   <section class="reviews" id="reviews">
-    <h2>Lo que dicen nuestros clientes</h2>
+    <h2>Reseñas</h2>
     <div id="reviews-container"></div>
-  </section>
-
-  <div id="burger-modal" class="modal hidden">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <img id="modal-img" src="" alt="Hamburguesa" />
-      <h3 id="modal-title"></h3>
-      <p id="modal-description"></p>
-
-      <form id="order-form" onsubmit="sendOrder(event)">
-        <label for="quantity">Cantidad:</label>
-        <input type="number" id="quantity" name="quantity" min="1" value="1" required />
-
-        <div class="price-line">
-          <label><strong>Precio por unidad:</strong> <span id="unit-price">$0</span></label>
-          <label><strong>Total:</strong> <span id="order-total">$0</span></label>
-        </div>
-
-        <label for="address">Dirección de entrega:</label>
-        <input type="text" id="address" name="address" required />
-
-        <label for="comment">Comentario adicional:</label>
-        <textarea id="comment" name="comment"></textarea>
-
-        <input type="hidden" id="product-name" name="product-name" />
-        <button type="submit">Pedir por WhatsApp</button>
-      </form>
-
-      <div class="modal-nav">
-        <button id="prev-btn" onclick="prevProduct()">← Anterior</button>
-        <button id="next-btn" onclick="nextProduct()">Siguiente →</button>
-        <button id="toggle-cart-btn" class="btn"></button>
-      </div>
-    </div>
-  </div>
-
-  <section class="cart-section">
-    <h2>Tu pedido</h2>
-    <div id="cart-summary"></div>
   </section>
 
   <section class="contact" id="contact">
     <h2>Contacto</h2>
-    <p>Contactanos por nuestras redes sociales o hacé tu pedido directamente.</p>
     <div class="contact-methods">
-      <a id="instagram-link" target="_blank">
-        <img src="/images/instagram-icon.png" alt="Instagram" class="icon" />
-      </a>
-      <a id="whatsapp-contact" target="_blank">
-        <img src="/images/whatsapp-icon.png" alt="WhatsApp" class="icon" />
-      </a>
+      {negocio?.instagram && (
+        <a href={negocio.instagram} target="_blank" rel="noopener noreferrer">
+          <img src="/images/instagram.svg" alt="Instagram" class="icon" /> Instagram
+        </a>
+      )}
+      {negocio?.whatsapp && (
+        <a href={`https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(negocio?.mensaje_inicio_chat || 'Necesito hacer un pedido...')}`} target="_blank">
+          <img src="/images/whatsapp.svg" alt="WhatsApp" class="icon" /> WhatsApp
+        </a>
+      )}
     </div>
   </section>
+
   <footer class="footer">
-    <p>&copy; <script>document.write(new Date().getFullYear())</script> <span id="footer-nombre">BIG CORNER</span>. Todos los derechos reservados.</p>
-    <p>
-      Sitio desarrollado por <a href="https://marketing-bso.netlify.app/" target="_blank" style="color: inherit; text-decoration: underline;">BSO Web Studio</a>
-    </p>
+    <p>&copy; {new Date().getFullYear()} {negocio?.nombre || 'Nombre del Local'}. Todos los derechos reservados.</p>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
-  <script src="/scripts/modal.js" defer></script>
-
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const baseId = '1oSXRJkVeD3napDd9bltITSA4snw4uqOgXzLtfav05yo';
-
-      const urls = {
-        negocio: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=negocio`,
-        productos: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=productos`,
-        resenas: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=resenas`
-      };
-
-      function fetchCSV(url, header = false) {
-        return fetch(url)
-          .then(res => res.text())
-          .then(csv => Papa.parse(csv, { header }).data);
-      }
-
-      Promise.all([
-        fetchCSV(urls.negocio, true),
-        fetchCSV(urls.productos, true),
-        fetchCSV(urls.resenas, true)
-      ]).then(([negocio, productos, resenas]) => {
-        const data = Object.fromEntries(
-          negocio
-            .filter(item => item && item.clave && item.valor)
-            .map(item => [item.clave.trim(), item.valor.trim()])
-        );
-
-        document.getElementById('logo-img').src = data.logo;
-        document.getElementById('logo-img').alt = data.nombre;
-        document.getElementById('titulo-local').textContent = data.nombre;
-        document.getElementById('horario').textContent = data.horario;
-        document.getElementById('menu-subtitulo').textContent = data.subtitulo_menu;
-        document.getElementById('descripcion-local').textContent = data.descripcion;
-        document.getElementById('whatsapp-button').href = `https://wa.me/${data.whatsapp}?text=${encodeURIComponent(data.mensaje_boton_whatsapp)}`;
-        document.getElementById('whatsapp-button').textContent = data.texto_boton_whatsapp;
-        document.getElementById('instagram-link').href = data.instagram;
-        document.getElementById('whatsapp-contact').href = `https://wa.me/${data.whatsapp}?text=${encodeURIComponent(data.mensaje_inicio_chat)}`;
-        document.getElementById('footer-nombre').textContent = data.nombre;
-
-        window.dynamicWhatsapp = data.whatsapp;
-
-        const list = document.getElementById('burger-list');
-        window.dynamicProducts = productos.filter(row => row.nombre?.trim() && row.imagen?.trim()).map(row => ({
-          name: row.nombre,
-          description: row.descripcion,
-          image: row.imagen,
-          price: Number(row.precio)
-        }));
-
-        list.innerHTML = window.dynamicProducts.map((product, index) => `
-          <div class="burger-card" onclick="openModalFromList(${index})">
-            <img src="${product.image}" alt="${product.name}" />
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <p class="price">$${product.price}</p>
-          </div>
-        `).join('');
-
-        document.getElementById('reviews-container').innerHTML = resenas.filter(r => r.cita?.trim() && r.autor?.trim()).map(r => `
-          <div class="review">
-            <p>“${r.cita.trim()}”</p>
-            <span>- ${r.autor.trim()}</span>
-          </div>
-        `).join('');
-      }).catch(err => {
-        console.error("Error cargando los datos:", err);
-      });
-    });
-  </script>
+  <script type="module" src="/loadData.js"></script>
 </Layout>
