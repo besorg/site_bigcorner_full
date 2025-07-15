@@ -6,10 +6,10 @@ window.addEventListener('DOMContentLoaded', () => {
       const rows = parsed.data;
 
       const products = rows.filter(row => row.name && row.image).map(row => ({
-        name: row.name,
-        description: row.description,
-        image: row.image,
-        price: row.price
+        name: row.nombre,
+        description: row.descripcion,
+        image: row.imagen,
+        price: row.precio
       }));
 
       const whatsapp = '5491132776974';
@@ -17,8 +17,8 @@ window.addEventListener('DOMContentLoaded', () => {
       const reviews = rows
         .filter(row => row.reviews && row.reviews.includes('|'))
         .map(row => {
-          const [quote, author] = row.reviews.split('|');
-          return { quote: quote.trim(), author: author.trim() };
+          const [cita, autor] = row.reviews.split('|');
+          return { cita: cita.trim(), autor: autor.trim() };
         });
 
       window.dynamicProducts = products;
