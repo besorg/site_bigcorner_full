@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import loadData from '../scripts/loadData.js';
 ---
 
 <Layout title="BIG CORNER - Hamburguesas">
@@ -33,11 +34,19 @@ import Layout from '../layouts/Layout.astro';
   </section>
 
   <div id="burger-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
     <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
+      <span class="close" onclick="closeModal()">×</span>
+
+      <div class="modal-arrows">
+        <button class="arrow arrow-left" onclick="prevProduct()">←</button>
+        <button class="arrow arrow-right" onclick="nextProduct()">→</button>
+      </div>
+
       <img id="modal-img" src="" alt="Hamburguesa" />
       <h3 id="modal-title"></h3>
       <p id="modal-description"></p>
+
       <form id="order-form" onsubmit="sendOrder(event)">
         <label for="quantity">Cantidad:</label>
         <input type="number" id="quantity" name="quantity" min="1" value="1" required />
@@ -45,6 +54,7 @@ import Layout from '../layouts/Layout.astro';
           <label><strong>Precio por unidad:</strong> <span id="unit-price">$0</span></label>
           <label><strong>Total:</strong> <span id="order-total">$0</span></label>
         </div>
+
         <label for="address">Dirección de entrega:</label>
         <input type="text" id="address" name="address" required />
         <label for="comment">Comentario adicional:</label>
@@ -81,55 +91,8 @@ import Layout from '../layouts/Layout.astro';
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script src="/scripts/modal.js" defer></script>
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const baseId = '1oSXRJkVeD3napDd9bltITSA4snw4uqOgXzLtfav05yo';
-      const urls = {
-        productos: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=productos`,
-        resenias: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=resenias`
-      };
-
-      function fetchCSV(url) {
-        return fetch(url)
-          .then(res => res.text())
-          .then(csv => {
-            const parsed = Papa.parse(csv, { header: false }).data;
-            const headers = parsed[0].map(h => h.trim().toLowerCase());
-            return parsed.slice(1).map(row => {
-              const obj = {};
-              headers.forEach((key, i) => {
-                obj[key] = row[i]?.trim?.() ?? '';
-              });
-              return obj;
-            });
-          });
-      }
-
-      Promise.all([
-        fetchCSV(urls.productos),
-        fetchCSV(urls.resenias)
-      ]).then(([productosRows, reseniasRows]) => {
-        const products = productosRows.filter(p => p.nombre && p.imagen);
-        window.dynamicProducts = products;
-
-        const list = document.getElementById('burger-list');
-        list.innerHTML = products.map((product, index) => `
-          <div class="burger-card" onclick="openModalFromList(${index})">
-            <img src="${product.imagen}" alt="${product.nombre}" />
-            <h3>${product.nombre}</h3>
-            <p>${product.descripcion}</p>
-            <p class="price">$${product.precio}</p>
-          </div>
-        `).join('');
-
-        const reviews = reseniasRows
-          .filter(r => r.cita && r.autor)
-          .map(r => `<div class="review"><p>“${r.cita.trim()}”</p><span>- ${r.autor.trim()}</span></div>`);
-
-        document.getElementById('reviews-container').innerHTML = reviews.join('');
-      }).catch(err => {
-        console.error("Error cargando productos o reseñas:", err);
-      });
-    });
+  <script type="module">
+    import loadData from '/scripts/loadData.js';
+    loadData();
   </script>
 </Layout>

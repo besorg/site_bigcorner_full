@@ -1,105 +1,170 @@
-window.cart = [];
+// ...código anterior...
 
-function renderCart() {
-  console.log("Carrito actual:", window.cart);
-  // Aquí podrías renderizar el contenido del carrito en el modal si se desea
+let cart = [];
+let currentIndex = 0;
+
+let startX = null;
+let endX = null;
+
+function setupSwipeListeners() {
+  const modal = document.getElementById('burger-modal');
+  if (!modal) return;
+
+  // Swipe en pantallas táctiles
+  modal.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+  });
+
+  modal.addEventListener('touchend', e => {
+    endX = e.changedTouches[0].clientX;
+    handleSwipe();
+  });
+
+  // Swipe con mouse
+  modal.addEventListener('mousedown', e => {
+    startX = e.clientX;
+  });
+
+  modal.addEventListener('mouseup', e => {
+    endX = e.clientX;
+    handleSwipe();
+  });
 }
 
-function showClearCartButton() {
-  const form = document.getElementById('order-form');
-  if (!document.getElementById('clear-cart-button')) {
-    const btn = document.createElement('button');
-    btn.id = 'clear-cart-button';
-    btn.type = 'button';
-    btn.textContent = '¿Tu pedido fue enviado? Hacé clic acá para vaciar el carrito';
-    btn.onclick = () => {
-      window.cart = [];
-      renderCart();
-      btn.remove();
-    };
-    btn.style.marginTop = '1rem';
-    form.appendChild(btn);
+function handleSwipe() {
+  if (startX === null || endX === null) return;
+  const deltaX = endX - startX;
+  if (Math.abs(deltaX) > 50) {
+    if (deltaX > 0) {
+      prevProduct();
+    } else {
+      nextProduct();
+    }
   }
+  startX = null;
+  endX = null;
 }
 
-window.openModalFromList = function(index) {
-  const products = window.dynamicProducts || [];
-  const product = products[index];
-  if (!product) {
-    console.error("Producto no encontrado en el índice:", index);
-    return;
-  }
-
-  window.currentProductIndex = index;
-
-  const modal = document.getElementById('burger-modal');
-  const img = document.getElementById('modal-img');
-  const title = document.getElementById('modal-title');
-  const description = document.getElementById('modal-description');
-  const unitPrice = document.getElementById('unit-price');
-  const totalDisplay = document.getElementById('order-total');
-  const productName = document.getElementById('product-name');
-  const quantityInput = document.getElementById('quantity');
-
-  img.src = product.imagen;
-  img.alt = product.nombre;
-  title.textContent = product.nombre;
-  description.textContent = product.descripcion;
-  unitPrice.textContent = `$${product.precio}`;
-  totalDisplay.textContent = `$${product.precio}`;
-  productName.value = product.nombre;
-  quantityInput.value = 1;
-
-  quantityInput.oninput = () => {
-    const q = parseInt(quantityInput.value) || 1;
-    totalDisplay.textContent = `$${q * product.precio}`;
-  };
-
-  modal.classList.remove('hidden');
-};
-
-window.closeModal = function() {
-  const modal = document.getElementById('burger-modal');
-  modal.classList.add('hidden');
-};
-
-window.addToCart = function() {
+function addToCart() {
   const name = document.getElementById('product-name').value;
   const quantity = parseInt(document.getElementById('quantity').value);
-  const product = window.dynamicProducts.find(p => p.nombre === name);
-  if (!product) return;
+  const price = parseFloat(document.getElementById('unit-price').textContent.replace('$', ''));
+  if (!name || quantity <= 0) return;
 
-  const existing = window.cart.find(p => p.nombre === name);
+  const existing = cart.find(item => item.name === name);
   if (existing) {
-    existing.cantidad += quantity;
+    existing.quantity += quantity;
   } else {
-    window.cart.push({ nombre: name, cantidad: quantity, precio: parseFloat(product.precio) });
+    cart.push({ name, quantity, price });
   }
-
   renderCart();
-  closeModal();
-};
+}
 
-window.sendOrder = function() {
-  const address = document.getElementById('address').value;
-  const comment = document.getElementById('comment').value;
+function removeFromCart(name) {
+  cart = cart.filter(item => item.name !== name);
+  renderCart();
+}
 
-  if (window.cart.length === 0) {
-    alert("El carrito está vacío.");
+function renderCart() {
+  const container = document.getElementById('cart-summary');
+  if (!container) return;
+
+  if (cart.length === 0) {
+    container.innerHTML = '<p style="margin-top: 1rem;">Tu carrito está vacío.</p>';
     return;
   }
 
   let total = 0;
-  let itemList = window.cart.map(item => {
-    const subtotal = item.cantidad * item.precio;
+  const itemsHTML = cart.map(item => {
+    const subtotal = item.quantity * item.price;
     total += subtotal;
-    return `- ${item.cantidad} x ${item.nombre} = $${subtotal}`;
-  }).join("\n");
+    return `
+      <div class="cart-item">
+        <span><strong>${item.quantity}×</strong> ${item.name}</span>
+        <span>$${subtotal}</span>
+        <button class="remove-btn" onclick="removeFromCart('${item.name}')">❌</button>
+      </div>
+    `;
+  }).join('');
 
-  const message = `¡Hola! Quisiera hacer un pedido:\n\n${itemList}\n\nTotal: $${total}\nDirección: ${address}\nComentario: ${comment}`;
-  const whatsapp = "5491132776974";
-  const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`;
+  container.innerHTML = `
+    <div class="cart-list">${itemsHTML}</div>
+    <p class="cart-total"><strong>Total: $${total}</strong></p>
+  `;
+}
 
-  window.open(url, "_blank");
-  showClearCartButton();
-};
+function clearCart() {
+  cart = [];
+  renderCart();
+}
+
+function getCartText() {
+  if (cart.length === 0) return '';
+  let text = 'Pedido:\n';
+  let total = 0;
+  cart.forEach(item => {
+    const subtotal = item.quantity * item.price;
+    total += subtotal;
+    text += `- ${item.quantity}× ${item.name}: $${subtotal}\n`;
+  });
+  text += `\nTotal: $${total}`;
+  return text;
+}
+
+function sendOrder(event) {
+  event.preventDefault();
+
+  const address = document.getElementById('address').value;
+  const comment = document.getElementById('comment').value;
+
+  const text = getCartText() + `\n\nDirección: ${address}\nComentario: ${comment}`;
+  if (!text.trim()) return;
+
+  const url = `https://wa.me/5491132776974?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+
+  const container = document.getElementById('cart-summary');
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = '¿Tu pedido fue enviado? Hacé clic acá para vaciar el carrito';
+  clearBtn.onclick = () => {
+    clearCart();
+    clearBtn.remove();
+  };
+  clearBtn.classList.add('btn-clear');
+  container.appendChild(clearBtn);
+}
+
+function openModalFromList(index) {
+  const product = window.dynamicProducts[index];
+  if (!product) return;
+
+  currentIndex = index;
+
+  document.getElementById('modal-img').src = product.imagen;
+  document.getElementById('modal-title').textContent = product.nombre;
+  document.getElementById('modal-description').textContent = product.descripcion;
+  document.getElementById('unit-price').textContent = `$${product.precio}`;
+  document.getElementById('order-total').textContent = `$${product.precio}`;
+  document.getElementById('product-name').value = product.nombre;
+  document.getElementById('quantity').value = 1;
+
+  document.getElementById('burger-modal').classList.remove('hidden');
+  renderCart();
+  setupSwipeListeners();
+}
+
+function nextProduct() {
+  if (!window.dynamicProducts) return;
+  currentIndex = (currentIndex + 1) % window.dynamicProducts.length;
+  openModalFromList(currentIndex);
+}
+
+function prevProduct() {
+  if (!window.dynamicProducts) return;
+  currentIndex = (currentIndex - 1 + window.dynamicProducts.length) % window.dynamicProducts.length;
+  openModalFromList(currentIndex);
+}
+
+function closeModal() {
+  document.getElementById('burger-modal').classList.add('hidden');
+}
