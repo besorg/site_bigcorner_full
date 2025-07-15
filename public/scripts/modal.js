@@ -1,6 +1,6 @@
 window.openModalFromList = function(index) {
   const products = window.dynamicProducts || [];
-  const whatsapp = window.dynamicWhatsapp || "5491132776974";
+  const whatsapp = "5491132776974";
 
   const product = products[index];
   if (!product) {
@@ -52,7 +52,7 @@ window.sendOrder = function(event) {
   const total = price * quantity;
   const message = `¡Hola! Quisiera pedir ${quantity} ${name}.\nDirección: ${address}\nComentario: ${comment}\nTotal: $${total}`;
 
-  const whatsapp = window.dynamicWhatsapp || "5491132776974";
+  const whatsapp = "5491132776974";
   const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`;
 
   window.open(url, "_blank");
