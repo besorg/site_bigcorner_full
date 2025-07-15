@@ -115,7 +115,11 @@ import Layout from '../layouts/Layout.astro';
         fetchCSV(urls.productos, true),
         fetchCSV(urls.resenas, true)
       ]).then(([negocio, productos, resenas]) => {
-        const data = Object.fromEntries(negocio.map(item => [item.clave?.trim(), item.valor?.trim()]));
+        const data = Object.fromEntries(
+          negocio
+            .filter(item => item && item.clave && item.valor)
+            .map(item => [item.clave.trim(), item.valor.trim()])
+        );
 
         document.getElementById('logo-img').src = data.logo;
         document.getElementById('logo-img').alt = data.nombre;
