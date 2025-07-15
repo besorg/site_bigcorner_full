@@ -65,20 +65,20 @@ import Layout from '../layouts/Layout.astro';
     <h2>Contacto</h2>
     <p>Contactanos por nuestras redes sociales o hacé tu pedido directamente.</p>
     <div class="contact-methods">
-      <a href="https://instagram.com/bigcorner2024" target="_blank">
-        <img src="/images/instagram-icon.png" alt="Instagram" class="icon" />
-      </a>
       <a href="https://wa.me/5491132776974" target="_blank">
         <img src="/images/whatsapp-icon.png" alt="WhatsApp" class="icon" />
+      </a>
+      <a href="https://instagram.com/bigcorner2024" target="_blank">
+        <img src="/images/instagram-icon.png" alt="Instagram" class="icon" />
       </a>
     </div>
   </section>
 
   <footer class="footer">
+    <p>&copy; BIG CORNER. Todos los derechos reservados.</p>
     <p>
-      Sitio desarrollado por <a href="https://marketing-bso.netlify.app/" target="_blank" style="color: inherit; text-decoration: underline;">BSO Web Studio</a>
+      2025 - Sitio desarrollado por <a href="https://marketing-bso.netlify.app/" target="_blank" style="color: inherit; text-decoration: underline;">BSO Web Studio</a>
     </p>
-    <p>&copy; <script>document.write(new Date().getFullYear())</script> BIG CORNER. Todos los derechos reservados.</p>
   </footer>
 
   <!-- PapaParse -->
@@ -93,9 +93,8 @@ import Layout from '../layouts/Layout.astro';
       const baseId = '1oSXRJkVeD3napDd9bltITSA4snw4uqOgXzLtfav05yo';
 
       const urls = {
-        menu: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=menu`,
-        whatsapp: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=whatsapp`,
-        reviews: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=reviews`
+        menu: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=Productos`,
+        reviews: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=Resenias`
       };
 
       function fetchCSV(url) {
@@ -116,11 +115,10 @@ import Layout from '../layouts/Layout.astro';
 
       Promise.all([
         fetchCSV(urls.menu),
-        fetchCSV(urls.whatsapp),
         fetchCSV(urls.reviews)
-      ]).then(([menuRows, whatsappRows, reviewsRows]) => {
+      ]).then(([menuRows, reviewsRows]) => {
         // WhatsApp
-        const whatsapp = whatsappRows[0]?.whatsapp?.trim() || '5491132776974';
+        const whatsapp = '5491132776974';
         window.dynamicWhatsapp = whatsapp;
 
 const whatsappButton = document.getElementById('whatsapp-button');
