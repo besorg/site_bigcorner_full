@@ -1,103 +1,52 @@
-// loadData.js
+---
+const { title } = Astro.props;
+---
 
-const sheetBase = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQr7KiXU6pmYH4ZEvVfUB9ivfdyko0u5JS1mupvR14wujBk_ZKU2qN9U9WznM9xKYyIAGcqvniIj-WC/pub?output=csv&sheet='
-const productosURL = sheetBase + 'productos';
-const reseñasURL = sheetBase + 'reseñas';
-const negocioURL = sheetBase + 'negocio';
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+  </head>
+  <body class="light">
+    <header class="header">
+      <nav class="navbar container">
+        <div class="logo-area">
+          <img src="/images/favicon.png" alt="Logo BIG CORNER" class="logo" />
+          <span class="brand-name">BIG CORNER</span>
+        </div>
+        <ul class="nav-links">
+          <li><a href="#menu">Menú</a></li>
+          <li><a href="#about">Sobre Nosotros</a></li>
+          <li><a href="#reviews">Reseñas</a></li>
+          <li><a href="#contact">Contacto</a></li>
+          <li>
+            <button id="toggle-theme" class="theme-toggle">🌙</button>
+          </li>
+        </ul>
+      </nav>
+    </header>
 
-// === Negocio ===
-Papa.parse(negocioURL, {
-  download: true,
-  header: true,
-  complete: function (results) {
-    const datos = results.data;
-    const negocio = {};
-    datos.forEach(item => {
-      negocio[item.clave] = item.valor;
-    });
+    <main>
+      <slot />
+    </main>
 
-    if (negocio.logo) {
-      document.querySelectorAll('.logo').forEach(img => img.src = negocio.logo);
-    }
-    if (negocio.nombre) {
-      document.querySelectorAll('.brand-name').forEach(el => el.textContent = negocio.nombre);
-      document.querySelector('title').textContent = negocio.nombre;
-      const footer = document.querySelector('.footer');
-      if (footer) footer.innerHTML = `&copy; ${new Date().getFullYear()} ${negocio.nombre}. Todos los derechos reservados.`;
-    }
-    if (negocio.descripcion) {
-      const about = document.getElementById('about-text');
-      if (about) about.textContent = negocio.descripcion;
-    }
-    if (negocio.horario) {
-      const horario = document.getElementById('horario');
-      if (horario) horario.textContent = negocio.horario;
-    }
-    if (negocio.subtitulo_menu) {
-      const subtitulo = document.querySelector('.menu-subtitle');
-      if (subtitulo) subtitulo.textContent = negocio.subtitulo_menu;
-    }
-    if (negocio.instagram) {
-      const link = document.getElementById('instagram-link');
-      if (link) link.href = negocio.instagram;
-    }
-    if (negocio.texto_boton_whatsapp) {
-      document.querySelectorAll('.btn-wsp').forEach(btn => btn.textContent = negocio.texto_boton_whatsapp);
-    }
-    if (negocio.whatsapp) {
-      let mensaje = negocio.mensaje_inicio_chat || '';
-      const wspURL = `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(mensaje)}`;
-      document.querySelectorAll('.btn-wsp').forEach(btn => btn.href = wspURL);
-    }
-  }
-});
+    <script>
+      const toggle = document.getElementById('toggle-theme');
+      const root = document.documentElement;
 
-// === Productos ===
-Papa.parse(productosURL, {
-  download: true,
-  header: true,
-  complete: function(results) {
-    const productos = results.data;
-    const container = document.getElementById('burger-list');
-    if (!container) return;
+      if (localStorage.getItem('theme') === 'dark') {
+        root.classList.add('dark');
+        toggle.textContent = '☀️';
+      }
 
-    productos.forEach((item, index) => {
-      if (!item.nombre || !item.descripcion || !item.imagen || !item.precio) return;
-
-      const card = document.createElement('div');
-      card.className = 'burger-card';
-      card.dataset.index = index;
-
-      card.innerHTML = `
-        <img src="${item.imagen}" alt="${item.nombre}" />
-        <h3>${item.nombre}</h3>
-        <p>${item.descripcion}</p>
-        <div class="price">$${item.precio}</div>
-      `;
-
-      container.appendChild(card);
-    });
-  }
-});
-
-// === Reseñas ===
-Papa.parse(reseñasURL, {
-  download: true,
-  header: true,
-  complete: function(results) {
-    const reseñas = results.data;
-    const container = document.getElementById('reviews-container');
-    if (!container) return;
-
-    reseñas.forEach(item => {
-      if (!item.comentario || !item.nombre) return;
-
-      const review = document.createElement('div');
-      review.className = 'review';
-      review.innerHTML = `
-        ${item.comentario}<span>- ${item.nombre}</span>
-      `;
-      container.appendChild(review);
-    });
-  }
-});
+      toggle?.addEventListener('click', () => {
+        const isDark = root.classList.toggle('dark');
+        toggle.textContent = isDark ? '☀️' : '🌙';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+    </script>
+  </body>
+</html>
