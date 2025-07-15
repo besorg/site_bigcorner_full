@@ -37,8 +37,8 @@ window.addEventListener('DOMContentLoaded', () => {
       const reviewsContainer = document.getElementById('reviews-container');
       reviewsContainer.innerHTML = reviews.map(r => `
         <div class="review">
-          <p>“${r.quote}”</p>
-          <span>- ${r.author}</span>
+          <p>“${r.cita}”</p>
+          <span>- ${r.autor}</span>
         </div>
       `).join('');
     });
