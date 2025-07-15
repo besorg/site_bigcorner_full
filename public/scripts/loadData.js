@@ -12,7 +12,7 @@ window.addEventListener('DOMContentLoaded', () => {
         price: row.price
       }));
 
-      const whatsapp = rows.find(row => row.whatsapp)?.whatsapp?.trim() || '5491132776974';
+      const whatsapp = '5491132776974';
 
       const reviews = rows
         .filter(row => row.reviews && row.reviews.includes('|'))
