@@ -91,13 +91,9 @@ import Layout from '../layouts/Layout.astro';
     <p>&copy; <script>document.write(new Date().getFullYear())</script> <span id="footer-nombre">BIG CORNER</span>. Todos los derechos reservados.</p>
   </footer>
 
-  <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
-
-  <!-- Modal logic -->
   <script src="/scripts/modal.js" defer></script>
 
-  <!-- Datos dinámicos -->
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       const baseId = '1oSXRJkVeD3napDd9bltITSA4snw4uqOgXzLtfav05yo';
@@ -108,28 +104,19 @@ import Layout from '../layouts/Layout.astro';
         resenas: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=resenas`
       };
 
-      function fetchCSV(url) {
+      function fetchCSV(url, header = false) {
         return fetch(url)
           .then(res => res.text())
-          .then(csv => {
-            const parsed = Papa.parse(csv, { header: false }).data;
-            const headers = parsed[0].map(h => h.trim().toLowerCase());
-            return parsed.slice(1).map(row => {
-              const obj = {};
-              headers.forEach((key, i) => {
-                obj[key] = row[i]?.trim?.() ?? '';
-              });
-              return obj;
-            });
-          });
+          .then(csv => Papa.parse(csv, { header }).data);
       }
 
       Promise.all([
-        fetchCSV(urls.negocio),
-        fetchCSV(urls.productos),
-        fetchCSV(urls.resenas)
+        fetchCSV(urls.negocio, true),
+        fetchCSV(urls.productos, true),
+        fetchCSV(urls.resenas, true)
       ]).then(([negocio, productos, resenas]) => {
-        const data = Object.fromEntries(negocio.map(item => [item.clave, item.valor]));
+        const data = Object.fromEntries(negocio.map(item => [item.clave?.trim(), item.valor?.trim()]));
+
         document.getElementById('logo-img').src = data.logo;
         document.getElementById('logo-img').alt = data.nombre;
         document.getElementById('titulo-local').textContent = data.nombre;
