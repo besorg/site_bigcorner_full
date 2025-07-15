@@ -128,12 +128,12 @@ if (whatsappButton && whatsapp) {
 
         // Productos
         const products = menuRows
-          .filter(row => row.name && row.image)
+          .filter(row => row.nombre && row.imagen)
           .map(row => ({
-            name: row.name,
-            description: row.description,
-            image: row.image,
-            price: row.price
+            name: row.nombre,
+            description: row.descripcion,
+            image: row.imagen,
+            price: row.precio
           }));
         window.dynamicProducts = products;
 
@@ -149,8 +149,8 @@ if (whatsappButton && whatsapp) {
 
         // Reseñas
         const reviews = reviewsRows
-          .filter(r => r.quote && r.author)
-          .map(r => `<div class="review"><p>“${r.quote.trim()}”</p><span>- ${r.author.trim()}</span></div>`);
+          .filter(r => r.cita && r.autor)
+          .map(r => `<div class="review"><p>“${r.cita.trim()}”</p><span>- ${r.autor.trim()}</span></div>`);
 
         document.getElementById('reviews-container').innerHTML = reviews.join('');
       }).catch(err => {
