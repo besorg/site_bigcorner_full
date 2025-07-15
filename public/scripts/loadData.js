@@ -1,45 +1,33 @@
-window.addEventListener('DOMContentLoaded', () => {
-  fetch('https://docs.google.com/spreadsheets/d/1oSXRJkVeD3napDd9bltITSA4snw4uqOgXzLtfav05yo/gviz/tq?tqx=out:csv')
-    .then(res => res.text())
-    .then(csvText => {
-      const parsed = Papa.parse(csvText, { header: true });
-      const rows = parsed.data;
+async function fetchGoogleSheetData(sheetUrl) {
+  const response = await fetch(sheetUrl);
+  const text = await response.text();
+  const parsed = Papa.parse(text, { header: true });
 
-      const products = rows.filter(row => row.name && row.image).map(row => ({
-        name: row.name,
-        description: row.description,
-        image: row.image,
-        price: row.price
-      }));
+  return parsed.data.filter(row => Object.values(row).some(cell => cell !== ""));
+}
 
-      const whatsapp = rows.find(row => row.whatsapp)?.whatsapp?.trim() || '5491132776974';
+async function loadData() {
+  const sheets = ['productos', 'reseñas', 'negocio'];
+  const baseId = '1tZCdHo9AGa1ts-j30mdUb2lnwh1v5rLMjGj3xtuKPRg'; // ID de tu Google Sheet
+  const gidMap = {
+    productos: '0',
+    reseñas: '1749471671',
+    negocio: '1592764057'
+  };
 
-      const reviews = rows
-        .filter(row => row.reviews && row.reviews.includes('|'))
-        .map(row => {
-          const [quote, author] = row.reviews.split('|');
-          return { quote: quote.trim(), author: author.trim() };
-        });
+  const data = {};
 
-      window.dynamicProducts = products;
-      window.dynamicWhatsapp = whatsapp;
+  for (const sheet of sheets) {
+    const gid = gidMap[sheet];
+    const url = `https://docs.google.com/spreadsheets/d/${baseId}/export?format=csv&id=${baseId}&gid=${gid}`;
+    const content = await fetchGoogleSheetData(url);
+    
+    if (sheet === 'negocio') {
+      data[sheet] = Object.fromEntries(content.map(row => [row.clave, row.valor]));
+    } else {
+      data[sheet] = content;
+    }
+  }
 
-      const list = document.getElementById('burger-list');
-      list.innerHTML = products.map((product, index) => `
-        <div class="burger-card" onclick="openModalFromList(${index})">
-          <img src="${product.image}" alt="${product.name}" />
-          <h3>${product.name}</h3>
-          <p>${product.description}</p>
-          <p class="price">$${product.price}</p>
-        </div>
-      `).join('');
-
-      const reviewsContainer = document.getElementById('reviews-container');
-      reviewsContainer.innerHTML = reviews.map(r => `
-        <div class="review">
-          <p>“${r.quote}”</p>
-          <span>- ${r.author}</span>
-        </div>
-      `).join('');
-    });
-});
+  return data;
+}
