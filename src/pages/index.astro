@@ -50,7 +50,11 @@ import Layout from '../layouts/Layout.astro';
         <label for="comment">Comentario adicional:</label>
         <textarea id="comment" name="comment"></textarea>
         <input type="hidden" id="product-name" name="product-name" />
+
+        <button type="button" onclick="addToCart()">Agregar al carrito</button>
         <button type="submit">Pedir por WhatsApp</button>
+
+        <div id="cart-summary" style="margin-top: 1rem;"></div>
       </form>
     </div>
   </div>
@@ -69,10 +73,10 @@ import Layout from '../layouts/Layout.astro';
   </section>
 
   <footer class="footer">
-    <p>&copy; 2025 BIG CORNER. Todos los derechos reservados.</p>
     <p>
       Sitio desarrollado por <a href="https://marketing-bso.netlify.app/" target="_blank" style="color: inherit; text-decoration: underline;">BSO Web Studio</a>
     </p>
+    <p>&copy; 2025 BIG CORNER. Todos los derechos reservados.</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
@@ -107,7 +111,6 @@ import Layout from '../layouts/Layout.astro';
       ]).then(([productosRows, reseniasRows]) => {
         const products = productosRows.filter(p => p.nombre && p.imagen);
         window.dynamicProducts = products;
-        window.dynamicWhatsapp = '5491132776974';
 
         const list = document.getElementById('burger-list');
         list.innerHTML = products.map((product, index) => `

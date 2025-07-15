@@ -1,12 +1,36 @@
+window.cart = [];
+
+function renderCart() {
+  console.log("Carrito actual:", window.cart);
+  // Aquí podrías renderizar el contenido del carrito en el modal si se desea
+}
+
+function showClearCartButton() {
+  const form = document.getElementById('order-form');
+  if (!document.getElementById('clear-cart-button')) {
+    const btn = document.createElement('button');
+    btn.id = 'clear-cart-button';
+    btn.type = 'button';
+    btn.textContent = '¿Tu pedido fue enviado? Hacé clic acá para vaciar el carrito';
+    btn.onclick = () => {
+      window.cart = [];
+      renderCart();
+      btn.remove();
+    };
+    btn.style.marginTop = '1rem';
+    form.appendChild(btn);
+  }
+}
+
 window.openModalFromList = function(index) {
   const products = window.dynamicProducts || [];
-  const whatsapp = window.dynamicWhatsapp || "5491132776974";
-
   const product = products[index];
   if (!product) {
     console.error("Producto no encontrado en el índice:", index);
     return;
   }
+
+  window.currentProductIndex = index;
 
   const modal = document.getElementById('burger-modal');
   const img = document.getElementById('modal-img');
@@ -39,23 +63,43 @@ window.closeModal = function() {
   modal.classList.add('hidden');
 };
 
-window.sendOrder = function(event) {
-  event.preventDefault();
-
+window.addToCart = function() {
   const name = document.getElementById('product-name').value;
   const quantity = parseInt(document.getElementById('quantity').value);
+  const product = window.dynamicProducts.find(p => p.nombre === name);
+  if (!product) return;
+
+  const existing = window.cart.find(p => p.nombre === name);
+  if (existing) {
+    existing.cantidad += quantity;
+  } else {
+    window.cart.push({ nombre: name, cantidad: quantity, precio: parseFloat(product.precio) });
+  }
+
+  renderCart();
+  closeModal();
+};
+
+window.sendOrder = function() {
   const address = document.getElementById('address').value;
   const comment = document.getElementById('comment').value;
-  const price = window.dynamicProducts.find(p => p.nombre === name)?.precio || 0;
 
-  const total = price * quantity;
-  const message = `¡Hola! Quisiera pedir ${quantity} ${name}.
-Dirección: ${address}
-Comentario: ${comment}
-Total: $${total}`;
+  if (window.cart.length === 0) {
+    alert("El carrito está vacío.");
+    return;
+  }
 
-  const whatsapp = window.dynamicWhatsapp || "5491132776974";
+  let total = 0;
+  let itemList = window.cart.map(item => {
+    const subtotal = item.cantidad * item.precio;
+    total += subtotal;
+    return `- ${item.cantidad} x ${item.nombre} = $${subtotal}`;
+  }).join("\n");
+
+  const message = `¡Hola! Quisiera hacer un pedido:\n\n${itemList}\n\nTotal: $${total}\nDirección: ${address}\nComentario: ${comment}`;
+  const whatsapp = "5491132776974";
   const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`;
 
   window.open(url, "_blank");
+  showClearCartButton();
 };
