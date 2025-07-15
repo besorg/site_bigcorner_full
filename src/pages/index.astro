@@ -5,20 +5,20 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="BIG CORNER - Hamburguesas">
   <section class="hero">
     <div class="hero-content">
-  <div class="hero-column">
-    <img src="/images/logo.png" alt="Logo BIG CORNER" class="hero-logo" />
-  </div>
-  <div class="hero-column">
-    <h1>Las mejores hamburguesas al mejor precio</h1>
-    <p>De jueves a domingo de 20:00 a 00:30</p>
-    <a id="whatsapp-button" class="btn hero-btn" target="_blank">Hacenos tu pedido</a>
-  </div>
-</div>
+      <div class="hero-column">
+        <img src="/images/logo.png" alt="Logo BIG CORNER" class="hero-logo" />
+      </div>
+      <div class="hero-column">
+        <h1>BIG CORNER</h1>
+        <p>De jueves a domingo de 20:00 a 00:30</p>
+        <a id="whatsapp-button" class="btn hero-btn" target="_blank" href="https://wa.me/5491132776974?text=Necesito%20hacer%20un%20pedido...">Hacenos tu pedido</a>
+      </div>
+    </div>
   </section>
 
   <section class="menu" id="menu">
     <h2>Menú</h2>
-    <p class="menu-subtitle">Tu pedido está a solo unos clicks y te lo llevamos a domicilio</p>
+    <p class="menu-subtitle">Tu pedido está a solo unos clics y te lo llevamos a domicilio</p>
     <div class="burger-list" id="burger-list"></div>
   </section>
 
@@ -38,23 +38,17 @@ import Layout from '../layouts/Layout.astro';
       <img id="modal-img" src="" alt="Hamburguesa" />
       <h3 id="modal-title"></h3>
       <p id="modal-description"></p>
-
       <form id="order-form" onsubmit="sendOrder(event)">
         <label for="quantity">Cantidad:</label>
         <input type="number" id="quantity" name="quantity" min="1" value="1" required />
-
-<div class="price-line">
-  <label><strong>Precio por unidad:</strong> <span id="unit-price">$0</span></label>
-  <label><strong>Total:</strong> <span id="order-total">$0</span></label>
-</div>
-
-
+        <div class="price-line">
+          <label><strong>Precio por unidad:</strong> <span id="unit-price">$0</span></label>
+          <label><strong>Total:</strong> <span id="order-total">$0</span></label>
+        </div>
         <label for="address">Dirección de entrega:</label>
         <input type="text" id="address" name="address" required />
-
         <label for="comment">Comentario adicional:</label>
         <textarea id="comment" name="comment"></textarea>
-
         <input type="hidden" id="product-name" name="product-name" />
         <button type="submit">Pedir por WhatsApp</button>
       </form>
@@ -75,27 +69,20 @@ import Layout from '../layouts/Layout.astro';
   </section>
 
   <footer class="footer">
+    <p>&copy; 2025 BIG CORNER. Todos los derechos reservados.</p>
     <p>
       Sitio desarrollado por <a href="https://marketing-bso.netlify.app/" target="_blank" style="color: inherit; text-decoration: underline;">BSO Web Studio</a>
     </p>
-    <p>&copy; <script>document.write(new Date().getFullYear())</script> BIG CORNER. Todos los derechos reservados.</p>
   </footer>
 
-  <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
-
-  <!-- Modal logic -->
   <script src="/scripts/modal.js" defer></script>
-
-  <!-- Carga de datos -->
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       const baseId = '1oSXRJkVeD3napDd9bltITSA4snw4uqOgXzLtfav05yo';
-
       const urls = {
-        menu: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=menu`,
-        whatsapp: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=whatsapp`,
-        reviews: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=reviews`
+        productos: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=productos`,
+        resenias: `https://docs.google.com/spreadsheets/d/${baseId}/gviz/tq?tqx=out:csv&sheet=resenias`
       };
 
       function fetchCSV(url) {
@@ -115,48 +102,30 @@ import Layout from '../layouts/Layout.astro';
       }
 
       Promise.all([
-        fetchCSV(urls.menu),
-        fetchCSV(urls.whatsapp),
-        fetchCSV(urls.reviews)
-      ]).then(([menuRows, whatsappRows, reviewsRows]) => {
-        // WhatsApp
-        const whatsapp = whatsappRows[0]?.whatsapp?.trim() || '5491132776974';
-        window.dynamicWhatsapp = whatsapp;
-
-const whatsappButton = document.getElementById('whatsapp-button');
-if (whatsappButton && whatsapp) {
-  whatsappButton.href = `https://wa.me/${whatsapp}`;
-}
-
-        // Productos
-        const products = menuRows
-          .filter(row => row.name && row.image)
-          .map(row => ({
-            name: row.name,
-            description: row.description,
-            image: row.image,
-            price: row.price
-          }));
+        fetchCSV(urls.productos),
+        fetchCSV(urls.resenias)
+      ]).then(([productosRows, reseniasRows]) => {
+        const products = productosRows.filter(p => p.nombre && p.imagen);
         window.dynamicProducts = products;
+        window.dynamicWhatsapp = '5491132776974';
 
         const list = document.getElementById('burger-list');
         list.innerHTML = products.map((product, index) => `
           <div class="burger-card" onclick="openModalFromList(${index})">
-            <img src="${product.image}" alt="${product.name}" />
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <p class="price">$${product.price}</p>
+            <img src="${product.imagen}" alt="${product.nombre}" />
+            <h3>${product.nombre}</h3>
+            <p>${product.descripcion}</p>
+            <p class="price">$${product.precio}</p>
           </div>
         `).join('');
 
-        // Reseñas
-        const reviews = reviewsRows
-          .filter(r => r.quote && r.author)
-          .map(r => `<div class="review"><p>“${r.quote.trim()}”</p><span>- ${r.author.trim()}</span></div>`);
+        const reviews = reseniasRows
+          .filter(r => r.cita && r.autor)
+          .map(r => `<div class="review"><p>“${r.cita.trim()}”</p><span>- ${r.autor.trim()}</span></div>`);
 
         document.getElementById('reviews-container').innerHTML = reviews.join('');
       }).catch(err => {
-        console.error("Error cargando los datos:", err);
+        console.error("Error cargando productos o reseñas:", err);
       });
     });
   </script>
